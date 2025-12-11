@@ -170,12 +170,9 @@ This will:
 3.  Generate Baselines (Untrained / RNN).
 4.  Compute Statistical Metrics (Entropy, Clustering, Replay).
 
-### Technical Report
-See [BLOG_POST.md](BLOG_POST.md) for a detailed write-up of the results.
-
-### Visualizations
-Generate summary plots:
+### Visualizations & Results
+The results are summarized in the interactive notebook:
 ```bash
 python notebooks/make_final_plots.py
 ```
-Check `notebooks/figures/` for outputs.
+View the synthesis dashboard in `notebooks/Final_Synthesis.ipynb`.
