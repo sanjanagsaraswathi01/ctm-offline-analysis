@@ -1,25 +1,19 @@
-*/__pycache__
-logs
-.DS_Store
-*.png
-*.pdf
-*.gif
-*.out
+# System
+__pycache__/
 *.pyc
-*.env
-*.pt
-*.mp4
-.vscode*
-*outputs*
-data/*
-!assets/*.gif
-!data/custom_datasets.py
-examples/*
-!examples/01_mnist.ipynb
-!examples/02_inference.ipynb
-!examples/03_mazes.ipynb
-!examples/04_parity.ipynb
-!examples/05_huggingface.ipynb
-!examples/goldfish.jpg
-checkpoints
-utils/hugging_face/
+.DS_Store
+.ipynb_checkpoints/
+
+# Virtual Env
+ctm_env/
+venv/
+.env
+
+# Large Data & Artifacts (Reproducible via scripts)
+data/*.h5
+data/*.zip
+checkpoints/
+
+# Logs
+logs/
+*.log

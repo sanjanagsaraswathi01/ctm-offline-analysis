@@ -139,3 +139,43 @@ You can download the data and checkpoints from here:
 - maze data: https://drive.google.com/file/d/1cBgqhaUUtsrll8-o2VY42hPpyBcfFv86/view?usp=drivesdk
 
 Checkpoints go in the `checkpoints` folder. For instance, when properly populated, the checkpoints folder will have the maze checkpoint in `checkpoints/mazes/...`
+
+# ⚡️ Reproduction & Analysis (CTM Project)
+
+This repository has been extended to analyze the **"Offline Thought"** capabilities of CTMs.
+
+## Project Findings
+1.  **Attractors**: CTM latent states converge to stable, class-specific basins ($\Delta z \to 0$).
+2.  **Offline Structure**: Without input, dynamics remain highly structured (Entropy $\ll$ Random Walk).
+3.  **Replay**: The model "replays" valid thoughts (Close to Wake Manifold), with fidelity correlating to task difficulty ($r = -0.87$).
+
+## 🚀 How to Reproduce
+We provide an end-to-end script to replicate all findings (Extraction -> Generation -> Analysis).
+
+### Prerequisites
+Ensure the environment is set up:
+```bash
+./setup_env.sh
+source ctm_env/bin/activate
+```
+
+### Run Full Pipeline
+```bash
+chmod +x run_reproduction.sh
+./run_reproduction.sh
+```
+This will:
+1.  Extract dynamics from the Trained Model.
+2.  Generate "Offline" trajectories (Masked inputs).
+3.  Generate Baselines (Untrained / RNN).
+4.  Compute Statistical Metrics (Entropy, Clustering, Replay).
+
+### Technical Report
+See [BLOG_POST.md](BLOG_POST.md) for a detailed write-up of the results.
+
+### Visualizations
+Generate summary plots:
+```bash
+python notebooks/make_final_plots.py
+```
+Check `notebooks/figures/` for outputs.
