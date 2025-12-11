@@ -1,178 +1,61 @@
-# 🕰️ The Continuous Thought Machine
+# CTM Offline Analysis: Quantifying Internal Thought Structure
 
-📚 [PAPER: Technical Report](https://arxiv.org/abs/2505.05522) | 📝 [Blog](https://sakana.ai/ctm/) | 🕹️ [Interactive Website](https://pub.sakana.ai/ctm) | ✏️ [Tutorial](examples/01_mnist.ipynb)
+This project extends the **Continuous Thought Machine (CTM)** architecture to scientifically verify the nature of its "Offline" dynamics. We investigate whether the model's internal states represent structured "thought" or random noise when sensory input is removed.
 
-![Activations](assets/activations.gif)
+> **Note**: This is an analysis extension built on top of the original [Continuous Thought Machines](https://github.com/SakanaAI/continuous-thought-machines) repository by Sakana AI.
 
-We present the Continuous Thought Machine (CTM), a model designed to unfold and then leverage neural activity as the underlying mechanism for observation and action. Our contributions are:
+## 🧪 Project Objective
+To determine if CTMs exhibit:
+1.  **Attractor Dynamics**: Do thoughts settle into stable basins?
+2.  **Offline Structure**: Is the internal state significantly different from random noise?
+3.  **Meaningful Replay**: Do offline thoughts correlate with valid task solutions?
 
-1. An internal temporal axis, decoupled from any input data, that enables neuron activity to unfold.
+## 📊 Key Findings
 
-2. Neuron-level temporal processing, where each neuron uses unique weight parameters to process a history of incoming signals, enabling fine-grained temporal dynamics.
+### 1. Attractors Confirmed
+We tracked latent velocities and found consistent convergence ($\Delta z \to 0$) into class-specific basins.
+-   **Inter-Class Distance**: High (~187)
+-   **Intra-Class Variance**: Low (~153)
 
-3. Neural synchronisation, employed as a direct latent representation for modulating data and producing outputs, thus directly encoding information in the timing of neural activity.
+### 2. Structured "Offline Mode"
+We masked inputs after $t=25$ and analyzed the resulting trajectories.
+-   **Entropy**: The model maintains low entropy (3.60) compared to random walks (4.39), proving the dynamics are non-random ($p \ll 0.001$).
+-   **Clustering**: States remain clustered by task concept even in total silence.
 
-We demonstrate the CTM's strong performance and versatility across a range of challenging tasks, including ImageNet classification, solving 2D mazes, sorting, parity computation, question-answering, and RL tasks.
+### 3. Replay & Difficulty
+We discovered a **"Deep Thought"** phenomenon:
+-   **Fidelity**: Offline states stay close to the "Wake Manifold" of valid computations.
+-   **Correlation**: Challenging tasks (longer mazes) induce *more* deviation from rote memory ($r = -0.87$), suggesting the model explores novel state spaces to solve hard problems.
 
-We provide all necessary code to reproduce our results and invite others to build upon and use CTMs in their own work.
+## 🚀 Reproduction Pipeline
 
-## [Interactive Website](https://pub.sakana.ai/ctm)
-Please see our [Interactive Website](https://pub.sakana.ai/ctm) for a maze-solving demo, many demonstrative videos of the method, results, and other findings. 
-
-
-## Repo structure
-```
-├── tasks
-│   ├── image_classification
-│   │   ├── train.py                          # Training code for image classification (cifar, imagenet)
-│   │   ├── imagenet_classes.py               # Helper for imagenet class names
-│   │   ├── plotting.py                       # Plotting utils specific to this task
-│   │   └── analysis
-│   │       ├──run_imagenet_analysis.py       # ImageNet eval and visualisation code
-│   │       └──outputs/                       # Folder for outputs of analysis
-│   ├── mazes
-│   │   ├── train.py                          # Training code for solving 2D mazes (by way of a route; see paper)
-│   │   └── plotting.py                       # Plotting utils specific to this task
-│   │   └── analysis
-│   │       ├──run.py                         # Maze analysis code
-│   │       └──outputs/                       # Folder for outputs of analysis
-│   ├── sort
-│   │   ├── train.py                          # Training code for sorting
-│   │   └── utils.py                          # Sort specific utils (e.g., CTC decode)
-│   ├── parity
-│   │   ├── train.py                          # Training code for parity task
-│   │   ├── utils.py                          # Parity-specific helper functions
-│   │   ├── plotting.py                       # Plotting utils specific to this task
-│   │   ├── scripts/
-│   │   │   └── *.sh                          # Training scripts for different experimental setups
-│   │   └── analysis/
-│   │       └── run.py                        # Entry point for parity analysis
-│   ├── qamnist
-│   │   ├── train.py                          # Training code for QAMNIST task (quantized MNIST)
-│   │   ├── utils.py                          # QAMNIST-specific helper functions
-│   │   ├── plotting.py                       # Plotting utils specific to this task
-│   │   ├── scripts/
-│   │   │   └── *.sh                          # Training scripts for different experimental setups
-│   │   └── analysis/
-│   │       └── run.py                        # Entry point for QAMNIST analysis
-│   └── rl
-│       ├── train.py                          # Training code for RL environments
-│       ├── utils.py                          # RL-specific helper functions
-│       ├── plotting.py                       # Plotting utils specific to this task
-│       ├── envs.py                           # Custom RL environment wrappers
-│       ├── scripts/
-│       │   ├── 4rooms/
-│       │   │   └── *.sh                      # Training scripts for MiniGrid-FourRooms-v0 environment
-│       │   ├── acrobot/
-│       │   │   └── *.sh                      # Training scripts for Acrobot-v1 environment
-│       │   └── cartpole/
-│       │       └── *.sh                      # Training scripts for CartPole-v1 environment
-│       └── analysis/
-│           └── run.py                        # Entry point for RL analysis
-├── data                                      # This is where data will be saved and downloaded to
-│   └── custom_datasets.py                    # Custom datasets (e.g., Mazes), sort
-├── models
-│   ├── ctm.py                                # Main model code, used for: image classification, solving mazes, sort
-│   ├── ctm_*.py                              # Other model code, standalone adjustments for other tasks
-│   ├── ff.py                                 # feed-forward (simple) baseline code (e.g., for image classification)
-│   ├── lstm.py                               # LSTM baseline code (e.g., for image classification)
-│   ├── lstm_*.py                              # Other baseline code, standalone adjustments for other tasks
-│   ├── modules.py                            # Helper modules, including Neuron-level models and the Synapse UNET
-│   ├── utils.py                              # Helper functions (e.g., synch decay)
-│   └── resnet.py                             # Wrapper for ResNet featuriser
-├── utils
-│   ├── housekeeping.py                       # Helper functions for keeping things neat
-│   ├── losses.py                             # Loss functions for various tasks (mostly with reshaping stuff)
-│   └── schedulers.py                         # Helper wrappers for learning rate schedulers
-└── checkpoints
-    └── imagenet, mazes, ...                  # Checkpoint directories (see google drive link for files)
-
-```
-
-## Setup
-To set up the environment using conda:
-
-```
-conda create --name=ctm python=3.12
-conda activate ctm
-pip install -r requirements.txt
-```
-
-If there are issues with PyTorch versions, the following can be ran:
-```
-pip uninstall torch
-pip install torch --index-url https://download.pytorch.org/whl/cu121
-```
-
-## Model training
-Each task has its own (set of) training code. See for instance [tasks/image_classification/train.py](tasks/image_classification/train.py). We have set it up like this to ensure ease-of-use as opposed to clinical efficiency. This code is for researchers and we hope to have it shared in a way that fosters collaboration and learning. 
-
-While we have provided reasonable defaults in the argparsers of each training setup, scripts to replicate the setups in the paper will typically be found in the accompanying script folders. If you simply want to dive in, run the following as a module (setup like this to make it easy to run many high-level training scripts from the top directory):
-
-```
-python -m tasks.image_classification.train
-```
-For debugging in VSCode, this configuration example might be helpful to you:
-```
-{
-    "name": "Debug: train image classifier",
-    "type": "debugpy",
-    "request": "launch",
-    "module": "tasks.image_classification.train",
-    "console": "integratedTerminal",
-    "justMyCode": false
-}
-```
-
-
-## Running analyses
-
-We also provide analysis and plotting code to replicate many of the plots in our paper. See `tasks/.../analysis/*` for more details on that. We also provide some data (e.g., the mazes we generated for training) and checkpoints (see [here](#checkpoints-and-data)). Note that ffmpeg is required for generating mp4 files from the analysis scripts. It can be installed with:
-```
-conda install -c conda-forge ffmpeg
-```
-
-
-## Checkpoints and data
-You can download the data and checkpoints from here: 
-- checkpoints: https://drive.google.com/drive/folders/1vSg8T7FqP-guMDk1LU7_jZaQtXFP9sZg
-- maze data: https://drive.google.com/file/d/1cBgqhaUUtsrll8-o2VY42hPpyBcfFv86/view?usp=drivesdk
-
-Checkpoints go in the `checkpoints` folder. For instance, when properly populated, the checkpoints folder will have the maze checkpoint in `checkpoints/mazes/...`
-
-# ⚡️ Reproduction & Analysis (CTM Project)
-
-This repository has been extended to analyze the **"Offline Thought"** capabilities of CTMs.
-
-## Project Findings
-1.  **Attractors**: CTM latent states converge to stable, class-specific basins ($\Delta z \to 0$).
-2.  **Offline Structure**: Without input, dynamics remain highly structured (Entropy $\ll$ Random Walk).
-3.  **Replay**: The model "replays" valid thoughts (Close to Wake Manifold), with fidelity correlating to task difficulty ($r = -0.87$).
-
-## 🚀 How to Reproduce
-We provide an end-to-end script to replicate all findings (Extraction -> Generation -> Analysis).
+We provide a single script to reproduce all experiments, from data extraction to statistical verification.
 
 ### Prerequisites
-Ensure the environment is set up:
 ```bash
 ./setup_env.sh
 source ctm_env/bin/activate
 ```
 
-### Run Full Pipeline
+### Run End-to-End Analysis
 ```bash
-chmod +x run_reproduction.sh
 ./run_reproduction.sh
 ```
-This will:
-1.  Extract dynamics from the Trained Model.
-2.  Generate "Offline" trajectories (Masked inputs).
-3.  Generate Baselines (Untrained / RNN).
-4.  Compute Statistical Metrics (Entropy, Clustering, Replay).
+This script will:
+1.  Extract dynamics from the pre-trained CTM.
+2.  Generate "Offline" datasets (Masked input).
+3.  Generate Baselines (Untrained CTM, Simple RNN).
+4.  Compute Entropy, Clustering, and Replay metrics.
 
-### Visualizations & Results
-The results are summarized in the interactive notebook:
+### Visualize Results
+To see the generated plots (Convergence, Structure, Correlation):
 ```bash
 python notebooks/make_final_plots.py
 ```
-View the synthesis dashboard in `notebooks/Final_Synthesis.ipynb`.
+Open `notebooks/Final_Synthesis.ipynb` for the interactive dashboard.
+
+## 📂 Repository Structure
+*   **`analysis/`**: Scientific metric definitions (Entropy, Manifold Distance).
+*   **`scripts/`**: Execution pipeline (Extraction, Simulation, Verification).
+*   **`models/`**: Baseline architecture definitions.
+*   **`notebooks/`**: Visualization and synthesis.
